@@ -10,19 +10,28 @@ import java.util.stream.IntStream;
 
 public class Main {
 
+    static int vertices;
+    static int edges; 
+    static int graphType; 
+    static int distroType; 
+    
+    static Random skewRand = new Random(); 
+    static Random normalRand = new Random();
+
     public static void main(String args[]) { // Input in this order: Vertices, Edges, Graph Type, Distro Type
-        int vertices = Integer.parseInt(args[0]); 
-        int edges = Integer.parseInt(args[1]); 
-        int graphType = Integer.parseInt(args[2]); // 1=Complete | 2=Cycle  | 3=Random 
-        int distroType = Integer.parseInt(args[3]); // 1=Uniform | 2=Skewed | 3=Normal
+        vertices = Integer.parseInt(args[0]); 
+        edges = Integer.parseInt(args[1]); 
+        graphType = Integer.parseInt(args[2]); // 1=Complete | 2=Cycle  | 3=Random 
+        distroType = Integer.parseInt(args[3]); // 1=Uniform | 2=Skewed | 3=Normal 
 
-        Random skewRand = new Random(); 
-        Random normalRand = new Random(); 
-
-        getDistro(distroType, vertices, skewRand, normalRand); 
+        getDistro(); 
     }
 
-    public static void getGraph(int graphType) { 
+    /*
+        GETTER METHODS (getGraph, getDistro)
+    */
+
+    public static void getGraph() { 
         switch(graphType) { 
             case 1: 
                 //Complete
@@ -38,7 +47,7 @@ public class Main {
         }
     }
 
-    public static void getDistro(int distroType, int vertices, Random skewRand, Random normalRandom) { 
+    public static void getDistro() { 
         switch(distroType) { 
             case 1: 
                 uniformInteger(vertices); // Returns the random Int
@@ -53,6 +62,10 @@ public class Main {
                 System.out.println("No such distrobution exists");
         }
     } 
+
+    /*
+        DISTRIBUTIONS CODE (Uniform, Skewed, Normal)
+    */
 
     public static int uniformInteger(int vertices) { 
         int uniRand = (int)(Math.random() * vertices) + 1;
@@ -81,4 +94,8 @@ public class Main {
         double num = normalRandom.nextGaussian() * stdDev + mean; 
         return (int)(num); 
     }
+
+    /*
+        GRAPHS CODE (Cycle, Complete, Random)
+    */
 }
