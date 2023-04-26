@@ -2,13 +2,17 @@
 Author: Bryan Putnam
 ID: 49235478
 Course: CS 7350
+
+INFO: 
+
+Contains code for Part I of project
 */ 
 
 import java.lang.Math; 
 import java.util.Random;
 import java.util.stream.IntStream;
 
-public class Main {
+public class part_1 {
 
     static int vertices;
     static int edges; 
@@ -31,13 +35,13 @@ public class Main {
     public static void getGraph() { 
         switch(graphType) { 
             case 1: 
-                //Complete
+                completeGraph();
                 break; 
             case 2: 
-                //Cycle
+                cycleGraph();
                 break; 
             case 3:
-                //Random
+                randomGraph();
                 break;  
             default: 
                 System.out.println("No such graph exists"); 
@@ -47,13 +51,13 @@ public class Main {
     public static void getDistro() { 
         switch(distroType) { 
             case 1: 
-            System.out.println(uniformDistro()); // Returns the random Int
+            uniformDistro(); // Returns the random Int
                 break; 
             case 2: 
-            System.out.println(skewedDistro()); // Returns the random Double
+            skewedDistro(); // Returns the random Int
                 break; 
             case 3:
-            System.out.println(normalDistro()); //Returns the random Int
+            normalDistro(); //Returns the random Int
                 break;  
             default: 
                 System.out.println("No such distrobution exists");
@@ -116,4 +120,16 @@ public class Main {
     /*
         GRAPHS CODE (Cycle, Complete, Random)
     */
+
+    public static void completeGraph() { 
+
+    }
+
+    public static void cycleGraph() { 
+
+    }
+
+    public static void randomGraph() { 
+
+    }
 }
