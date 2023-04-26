@@ -1,0 +1,8 @@
+3
+0
+COMPLETE
+UNIFORM
+0 2 1
+1 2 0
+2 1 0
+
