@@ -21,6 +21,14 @@ public class AdjList {
         return numEdges;
     }
 
+    public int[] getDegreeList(){
+        return degreeList;
+    }
+
+    public AdjNode[] getNodeList(){
+        return nodeList;
+    }
+
     public void addEdge(int source, int destination) {
         AdjNode destNode = new AdjNode(destination);
         destNode.setNextPtr(nodeList[source]);
