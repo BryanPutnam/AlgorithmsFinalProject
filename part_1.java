@@ -23,10 +23,12 @@ public class part_1 {
     static AdjList adj_list;
 
     public static void main(String args[]) {
-        //parseInput(args[0]);
-        parseInput("input.txt");
+        // start timer()
+        parseInput(args[0]);
+        //parseInput("input.txt");
         createGraph();
         outputGraph();
+        // end timer()
     }
 
     /*
