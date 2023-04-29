@@ -26,15 +26,18 @@ public class part_2 {
     private static int[] order; 
     private static int[] colors;
     private static double avgDegree;
+    private static int maxDegree; 
+    private static int maxColors; 
+    private static int cliqueSize; 
 
     private static AdjList adjList;
-    
     public static void main(String[] args) {
         parseInput(args[0]);
         startTimer(); 
         orderVertices();
         endTimer(); 
         color();
+        totalTime = (endTime - startTime); 
         outputData();
     }
 
@@ -64,20 +67,26 @@ public class part_2 {
             // Set all colors back to available for next vertex coloring iteration
             Arrays.fill(availableColors, true);
         }
+        for(int k = 0; k < vertices; k++) { // Find the max color
+            maxColors = colors[0];  
+            if(colors[k] > maxColors) { 
+                maxColors = colors[k]; 
+            }
+        }
     }
 
     public static void smallestLastOrdering() { // REQUIRED
         orderingName = "SMALLEST_LAST";
         order = new int[vertices]; 
-        int clique_size = vertices; 
+        cliqueSize = vertices; 
         int not_deleted_v = vertices; 
         avgDegree = Arrays.stream(adjList.getDegreeList()).average().orElse(Double.NaN);
-        int max_degree = -1; 
+        maxDegree = -1; 
 
         for(int i = 0; i < vertices; i++) { 
             int[] degreeListCopy = Arrays.copyOf(adjList.getDegreeList(), vertices);
-            if(not_deleted_v < clique_size && edges == (not_deleted_v * (not_deleted_v - 1)) / 2) { // is complete graph
-                clique_size = not_deleted_v; 
+            if(not_deleted_v < cliqueSize && edges == (not_deleted_v * (not_deleted_v - 1)) / 2) { // is complete graph
+                cliqueSize = not_deleted_v; 
             }
             int min = (vertices * (vertices -1)) / 2; // max edges for complete graph
             int min_vertex = -1; 
@@ -88,8 +97,8 @@ public class part_2 {
                     min_vertex = 1; 
                 }
             }
-            if(degreeListCopy[min_vertex] > max_degree) { //keep track of max degree when deleted 
-                max_degree = degreeListCopy[min_vertex]; 
+            if(degreeListCopy[min_vertex] > maxDegree) { //keep track of max degree when deleted 
+                maxDegree = degreeListCopy[min_vertex]; 
             }
 
             order[i] = min_vertex; 
@@ -311,11 +320,12 @@ public class part_2 {
             PrintWriter fileWriter = new PrintWriter(file);
 
             printColoring(fileWriter);
-            fileWriter.println("\nTotal Number of Colors Used: "); // TODO
+            fileWriter.println("\nTotal Number of Colors Used: " + maxColors);
             fileWriter.println("Average Original Degree: " + avgDegree);
+            fileWriter.println("Total time taken: " + totalTime);
             if (orderingName.equals("SMALLEST_LAST")){
-                fileWriter.println("Maximum 'Degree when Deleted' Value (Smallest Last Ordering): "); // TODO
-                fileWriter.println("Size of Terminal Clique (Smallest Last Ordering): "); // TODO
+                fileWriter.println("Maximum 'Degree when Deleted' Value (Smallest Last Ordering): " + maxDegree);
+                fileWriter.println("Size of Terminal Clique (Smallest Last Ordering): " + cliqueSize); 
             }
 
             fileWriter.close();
@@ -346,7 +356,7 @@ public class part_2 {
         write.println("Format: (Vertex, Color, Original Degree, Degree When Deleted - If Applicable)");
         for(int i : order){
             if (orderingName.equals("SMALLEST_LAST")){
-                 write.println(String.format("(%d, %d, %d, %d)", i, colors[i], adjList.getDegreeList()[i], 0)); // TODO: degree when deleted
+                 write.println(String.format("(%d, %d, %d, %d)", i, colors[i], adjList.getDegreeList()[i], maxDegree));
             }
             else {
                 write.println(String.format("(%d, %d, %d)", i, colors[i], adjList.getDegreeList()[i]));
