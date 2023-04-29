@@ -31,7 +31,9 @@ public class part_2 {
     
     public static void main(String[] args) {
         parseInput(args[0]);
+        startTimer(); 
         orderVertices();
+        endTimer(); 
         color();
         outputData();
     }
@@ -67,20 +69,67 @@ public class part_2 {
     public static void smallestLastOrdering() { // REQUIRED
         orderingName = "SMALLEST_LAST";
         order = new int[vertices]; 
+        int clique_size = vertices; 
+        int not_deleted_v = vertices; 
+        avgDegree = Arrays.stream(adjList.getDegreeList()).average().orElse(Double.NaN);
+        int max_degree = -1; 
 
-        // TODO
-        
+        for(int i = 0; i < vertices; i++) { 
+            int[] degreeListCopy = Arrays.copyOf(adjList.getDegreeList(), vertices);
+            if(not_deleted_v < clique_size && edges == (not_deleted_v * (not_deleted_v - 1)) / 2) { // is complete graph
+                clique_size = not_deleted_v; 
+            }
+            int min = (vertices * (vertices -1)) / 2; // max edges for complete graph
+            int min_vertex = -1; 
+
+            for(int j = 0; j < vertices; j++) { 
+                if(degreeListCopy[j] != -1 && degreeListCopy[j] < min) { 
+                    min = degreeListCopy[j]; 
+                    min_vertex = 1; 
+                }
+            }
+            if(degreeListCopy[min_vertex] > max_degree) { //keep track of max degree when deleted 
+                max_degree = degreeListCopy[min_vertex]; 
+            }
+
+            order[i] = min_vertex; 
+            edges -=1; 
+            not_deleted_v -=1; 
+            deleteDegree(degreeListCopy, min_vertex); 
+        }
     }
 
     public static void smallestOriginalOrdering() { // REQUIRED
         orderingName = "SMALLEST_ORIGINAL";
-        // TODO
+        order = new int[vertices]; 
+        avgDegree = Arrays.stream(adjList.getDegreeList()).average().orElse(Double.NaN);
+
+        for(int i = 0; i < vertices; i++) { 
+            int min = (vertices * (vertices - 1)) / 2; // max edges for complete graph
+            int min_vertex = -1; 
+            for(int j = 0; j < vertices; j++) { 
+                if(!Arrays.asList(order).contains(j) && adjList.getDegreeList()[j] < min) { 
+                    min = adjList.getDegreeList()[j]; 
+                    min_vertex = j; 
+                }
+            }
+            order[i] = min_vertex; 
+            
+        }
         
     }
 
     public static void uniformRandomOrdering() { // REQUIRED
         orderingName = "UNIFORM_RANDOM";
-        // TODO
+        order = new int[vertices]; 
+        Arrays.fill(order, -1); 
+        for(int i = 0; i < vertices; i++) { 
+            int index = getUniformRandom();
+            while(order[index] != -1) { 
+                index = getUniformRandom(); 
+            }
+            order[index] = i; 
+        }
     }
 
     public static void largestLastOrdering() { // YOUR CHOICE
@@ -149,6 +198,11 @@ public class part_2 {
     /*
      * HELPER FUNCTIONS
      */
+
+     public static int getUniformRandom() {
+        int uniRand = (int) (Math.random() * vertices); // 0 - vertices-1
+        return uniRand;
+    }
 
     public static void deleteDegree(int[] degreeListCopy, int source) { 
         degreeListCopy[source] = -1;
@@ -239,7 +293,6 @@ public class part_2 {
         }
     }
 
-    // TODO: timing
     public static long startTimer() { 
         startTime = System.currentTimeMillis(); 
         return startTime; 
@@ -300,5 +353,4 @@ public class part_2 {
             }
         }
     }
-
 }
