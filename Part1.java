@@ -14,7 +14,7 @@ import java.lang.Math;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
-public class part_1 {
+public class Part1 {
 
     static int vertices;
     static int edges;
@@ -22,12 +22,12 @@ public class part_1 {
     static String distroType;
     static AdjList adj_list;
 
-    public static void main(String args[]) {
+    public static String run(String input) {
         // start timer()
-        parseInput(args[0]);
+        parseInput(input);
         //parseInput("input.txt");
         createGraph();
-        outputGraph();
+        return outputGraph(); // returns name of output file
         // end timer()
     }
 
@@ -215,7 +215,7 @@ public class part_1 {
         return edges > (vertices * (vertices - 1) / 2);
     }
 
-    public static void outputGraph() {
+    public static String outputGraph() {
         try {
             String outputFileName = getOutputFileName();
             File file = new File(outputFileName);
@@ -234,9 +234,12 @@ public class part_1 {
 
             fileWriter.close();
 
+            return outputFileName;
+
         } catch (Exception e) {
             System.out.println("Error creating output file.");
             System.out.println(e.getMessage());
+            return "";
         }
     }
 

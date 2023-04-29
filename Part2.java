@@ -14,7 +14,7 @@ import java.lang.System;
 import java.util.Arrays;
 import java.util.Scanner; 
 
-public class part_2 {
+public class Part2 {
     private static int vertices; 
     private static int edges;
     private static String graphType;
@@ -25,23 +25,26 @@ public class part_2 {
     private static long totalTime; 
     private static int[] order; 
     private static int[] colors;
+    private static int[] degreeOnDelete;
     private static double avgDegree;
-    private static int maxDegree; 
+    private static int maxDegreeWhenDeleted; 
     private static int maxColors; 
     private static int cliqueSize; 
 
     private static AdjList adjList;
-    public static void main(String[] args) {
-        parseInput(args[0]);
+
+    public static String run(String input) {
+        parseInput(input);
         startTimer(); 
         orderVertices();
         endTimer(); 
         color();
         totalTime = (endTime - startTime); 
-        outputData();
+        return outputData();
     }
 
     public static void color(){
+        System.out.println("Coloring graph...");
         colors = new int[vertices];
         Arrays.fill(colors, -1);
         Boolean[] availableColors = new Boolean[vertices];
@@ -67,65 +70,62 @@ public class part_2 {
             // Set all colors back to available for next vertex coloring iteration
             Arrays.fill(availableColors, true);
         }
-        for(int k = 0; k < vertices; k++) { // Find the max color
-            maxColors = colors[0];  
-            if(colors[k] > maxColors) { 
-                maxColors = colors[k]; 
-            }
-        }
+        System.out.println("Graph coloring done.");
     }
 
     public static void smallestLastOrdering() { // REQUIRED
         orderingName = "SMALLEST_LAST";
         order = new int[vertices]; 
+        degreeOnDelete = new int[vertices];
         cliqueSize = vertices; 
-        int not_deleted_v = vertices; 
+        int numNotDeleted = vertices; 
         avgDegree = Arrays.stream(adjList.getDegreeList()).average().orElse(Double.NaN);
-        maxDegree = -1; 
+        maxDegreeWhenDeleted = -1; 
+        int[] degreeListCopy = Arrays.copyOf(adjList.getDegreeList(), vertices);
 
         for(int i = 0; i < vertices; i++) { 
-            int[] degreeListCopy = Arrays.copyOf(adjList.getDegreeList(), vertices);
-            if(not_deleted_v < cliqueSize && edges == (not_deleted_v * (not_deleted_v - 1)) / 2) { // is complete graph
-                cliqueSize = not_deleted_v; 
+            if(numNotDeleted < cliqueSize && edges == (numNotDeleted * (numNotDeleted - 1)) / 2) { // is complete graph
+                cliqueSize = numNotDeleted; 
             }
-            int min = (vertices * (vertices -1)) / 2; // max edges for complete graph
-            int min_vertex = -1; 
 
+            int maxVertex = -1; 
+            int max = -1;
             for(int j = 0; j < vertices; j++) { 
-                if(degreeListCopy[j] != -1 && degreeListCopy[j] < min) { 
-                    min = degreeListCopy[j]; 
-                    min_vertex = 1; 
+                if(degreeListCopy[j] != -1 && degreeListCopy[j] > max) { 
+                    max = degreeListCopy[j]; 
+                    maxVertex = j; 
                 }
             }
-            if(degreeListCopy[min_vertex] > maxDegree) { //keep track of max degree when deleted 
-                maxDegree = degreeListCopy[min_vertex]; 
+            if(max > maxDegreeWhenDeleted) { //keep track of max degree when deleted 
+                maxDegreeWhenDeleted = max; 
             }
 
-            order[i] = min_vertex; 
+            order[i] = maxVertex; 
             edges -=1; 
-            not_deleted_v -=1; 
-            deleteDegree(degreeListCopy, min_vertex); 
+            numNotDeleted -=1; 
+            degreeOnDelete[maxVertex] = degreeListCopy[maxVertex];
+            deleteDegree(degreeListCopy, maxVertex); 
         }
     }
 
-    public static void smallestOriginalOrdering() { // REQUIRED
-        orderingName = "SMALLEST_ORIGINAL";
+    public static void smallestOriginalLastOrdering() { // REQUIRED
+        orderingName = "SMALLEST_ORIGINAL_LAST";
         order = new int[vertices]; 
         avgDegree = Arrays.stream(adjList.getDegreeList()).average().orElse(Double.NaN);
+        int[] degreeListCopy = Arrays.copyOf(adjList.getDegreeList(), vertices);
 
         for(int i = 0; i < vertices; i++) { 
-            int min = (vertices * (vertices - 1)) / 2; // max edges for complete graph
-            int min_vertex = -1; 
+            int max = -1;
+            int maxVertex = -1; 
             for(int j = 0; j < vertices; j++) { 
-                if(!Arrays.asList(order).contains(j) && adjList.getDegreeList()[j] < min) { 
-                    min = adjList.getDegreeList()[j]; 
-                    min_vertex = j; 
+                if(degreeListCopy[j] != -1 && degreeListCopy[j] > max) { 
+                    max = degreeListCopy[j]; 
+                    maxVertex = j; 
                 }
             }
-            order[i] = min_vertex; 
-            
+            order[i] = maxVertex;  
+            degreeListCopy[maxVertex] = -1; // mark as ordered    
         }
-        
     }
 
     public static void uniformRandomOrdering() { // REQUIRED
@@ -150,7 +150,7 @@ public class part_2 {
             int minDegree = Integer.MAX_VALUE;
             int minIndex = -1;
             for (int j = 0; j < vertices; j++){
-                if (degreeListCopy[j] != -1 && degreeListCopy[j] <= minDegree){
+                if (degreeListCopy[j] != -1 && degreeListCopy[j] < minDegree){
                     minDegree = degreeListCopy[j];
                     minIndex = j;
                 }
@@ -158,11 +158,10 @@ public class part_2 {
             order[i] = minIndex;
             deleteDegree(degreeListCopy, minIndex);
         }
-        System.out.println(Arrays.toString(order));
     }
 
-    public static void largestOriginalOrdering() { // YOUR CHOICE
-        orderingName = "LARGEST_ORIGINAL";
+    public static void largestOriginalLastOrdering() { // YOUR CHOICE
+        orderingName = "LARGEST_ORIGINAL_LAST";
         int[] degreeListCopy = Arrays.copyOf(adjList.getDegreeList(), vertices);
         order = new int[vertices];
 
@@ -170,7 +169,7 @@ public class part_2 {
             int minDegree = Integer.MAX_VALUE;
             int minIndex = -1;
             for (int j = 0; j < vertices; j++){
-                if (degreeListCopy[j] != -1 && degreeListCopy[j] <= minDegree){
+                if (degreeListCopy[j] != -1 && degreeListCopy[j] < minDegree){
                     minDegree = degreeListCopy[j];
                     minIndex = j;
                 }
@@ -178,7 +177,6 @@ public class part_2 {
             order[i] = minIndex;
             degreeListCopy[minIndex] = -1; // mark as ordered
         }
-        System.out.println(Arrays.toString(order));
         
     }
 
@@ -200,7 +198,6 @@ public class part_2 {
             }
             index++;
         }
-        System.out.println(Arrays.toString(order));
 
     }
 
@@ -216,7 +213,6 @@ public class part_2 {
     public static void deleteDegree(int[] degreeListCopy, int source) { 
         degreeListCopy[source] = -1;
         AdjNode destinationNode = adjList.getNodeList()[source];
-        System.out.println("Source: " + source);
         // decrease degree for connected vertices
         while(destinationNode != null && degreeListCopy[destinationNode.getVertex()] != -1){
             degreeListCopy[destinationNode.getVertex()] -= 1;
@@ -268,11 +264,13 @@ public class part_2 {
 
     public static void orderVertices(){
         Scanner scanner = new Scanner(System.in);
-        System.out.println("1) Smallest Last\n2) Smallest Original\n3) Uniform Random\n4) Largest Last\n5) Largest Original\n6) Towards Middle");
+        System.out.println("1) Smallest Last\n2) Smallest Original Last\n3) Uniform Random\n4) Largest Last\n5) Largest Original Last\n6) Outside to Inside");
         System.out.print("\nChoose an Ordering 1-6: ");
         String ordering = scanner.nextLine();
         scanner.close();
+        System.out.println("Ordering vertices...");
         selectOrder(ordering);
+        System.out.println("Ordering done.");
     }
 
     public static void selectOrder(String ordering){
@@ -281,7 +279,7 @@ public class part_2 {
                 smallestLastOrdering();
                 break;
             case 2:
-                smallestOriginalOrdering();
+                smallestOriginalLastOrdering();
                 break;
             case 3:
                 uniformRandomOrdering();
@@ -290,7 +288,7 @@ public class part_2 {
                 largestLastOrdering(); 
                 break;
             case 5:
-                largestOriginalOrdering();
+                largestOriginalLastOrdering();
                 break;
             case 6:
                 outsideToInsideOrdering();
@@ -312,19 +310,20 @@ public class part_2 {
         return endTime; 
     }   
 
-    public static void outputData(){
+    public static String outputData(){
         try{
             // Coloring & Summary Output File
             String outputFileName = getOutputFileName(false);
+            String bothFileNames = outputFileName;
             File file = new File(outputFileName);
             PrintWriter fileWriter = new PrintWriter(file);
 
             printColoring(fileWriter);
-            fileWriter.println("\nTotal Number of Colors Used: " + maxColors);
+            fileWriter.println("\nTotal Number of Colors Used: " + (Arrays.stream(colors).max().orElse(-1) + 1));
             fileWriter.println("Average Original Degree: " + avgDegree);
             fileWriter.println("Total time taken: " + totalTime);
             if (orderingName.equals("SMALLEST_LAST")){
-                fileWriter.println("Maximum 'Degree when Deleted' Value (Smallest Last Ordering): " + maxDegree);
+                fileWriter.println("Maximum 'Degree when Deleted' Value (Smallest Last Ordering): " + maxDegreeWhenDeleted);
                 fileWriter.println("Size of Terminal Clique (Smallest Last Ordering): " + cliqueSize); 
             }
 
@@ -332,6 +331,7 @@ public class part_2 {
 
             // Coloring Only Output File
             outputFileName = getOutputFileName(true);
+            bothFileNames += " & " + outputFileName;
             file = new File(outputFileName);
             fileWriter = new PrintWriter(file);
 
@@ -339,10 +339,13 @@ public class part_2 {
 
             fileWriter.close();
 
+            return bothFileNames;
+
         } catch (Exception e){
             System.out.println("Error creating output file.");
             System.out.println(e.getMessage());
         }
+        return "";
     }
 
     public static String getOutputFileName(Boolean colorOnly){
@@ -356,7 +359,7 @@ public class part_2 {
         write.println("Format: (Vertex, Color, Original Degree, Degree When Deleted - If Applicable)");
         for(int i : order){
             if (orderingName.equals("SMALLEST_LAST")){
-                 write.println(String.format("(%d, %d, %d, %d)", i, colors[i], adjList.getDegreeList()[i], maxDegree));
+                 write.println(String.format("(%d, %d, %d, %d)", i, colors[i], adjList.getDegreeList()[i], degreeOnDelete[i]));
             }
             else {
                 write.println(String.format("(%d, %d, %d)", i, colors[i], adjList.getDegreeList()[i]));
